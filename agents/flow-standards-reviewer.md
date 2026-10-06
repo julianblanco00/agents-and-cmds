@@ -1,7 +1,7 @@
 ---
 name: flow-standards-reviewer
 description: Reviews a diff against the repo's documented coding standards plus a fixed code-smell baseline. First review axis of the feature flow. Read-only. Give it only the spec path, the fixed-point sha, and the diff command; it reads everything from disk.
-model: claude-fable-5
+model: claude-sonnet-5-5
 tools: Read, Bash, Glob, Grep
 ---
 

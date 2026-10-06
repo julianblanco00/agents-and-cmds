@@ -1,7 +1,7 @@
 ---
 name: flow-danger-reviewer
 description: Reviews a diff for dangerous code — destructive data operations (hard deletes, drops, mass updates), security vulnerabilities, irreversible side effects, and blast-radius hazards. Third review axis of the feature flow. Read-only. Give it only the spec path, the baseline sha, and the diff command; it reads everything from disk.
-model: claude-fable-5
+model: claude-sonnet-5-5
 tools: Read, Bash, Glob, Grep
 ---
 

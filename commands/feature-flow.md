@@ -1,7 +1,7 @@
 ---
-description: "Feature flow: grill → spec (file only) → loop implement (Opus 5) / code review (Fable 5) / tests until the spec checklist is done and green; Jira requirements re-verified every iteration; one commit per green slice; resumable after /clear via the spec's checklist + flow log"
+description: "Feature flow: grill → spec → conditional exploration → loop implement / review / test until the spec checklist is done and green; Jira requirements re-verified every iteration; one commit per green slice; final Opus integration review; resumable after /clear via the spec's checklist + flow log"
 argument-hint: <feature description, optionally with a Jira link>
-model: claude-opus-5
+model: claude-opus-5-5
 ---
 
 # Feature flow
@@ -9,19 +9,24 @@ model: claude-opus-5
 Run the full feature lifecycle for: **$ARGUMENTS**
 
 You are the orchestrator. You run at whatever model this command's `model:`
-frontmatter pins — `/flow-model status` shows it, `/flow-model opus|fable`
-switches it. Do not assert which model you are; read the pin if it matters.
+frontmatter pins — `/flow-model status` shows it, `/flow-model opus`
+resets it to Opus 5.5. Do not assert which model you are; read the pin if it matters.
 
-You never write code yourself. Only the `flow-implementer` subagent (Opus 5)
-writes code. All four review/verify agents — `flow-standards-reviewer`,
-`flow-spec-reviewer`, `flow-danger-reviewer`, `flow-verifier` — are PINNED to
-Fable 5 in their own agent files, regardless of the session model. If
-launching one fails because Fable is capped by usage limits, re-send the
-SAME path-only brief to the generic `claude` subagent (which uses the session
-model) and record `model: <session model>` in that iteration's Flow Log line
-— never skip the step because Fable is capped. If Fable is so capped that
-this command itself cannot start, run `/flow-model opus` and re-run;
-`/flow-model fable` restores Fable-first when the cap resets.
+You never write code yourself. Only the `flow-implementer` subagent writes
+code. Model allocation is intentional:
+
+- `flow-implementer`: Sonnet 5.5
+- `flow-standards-reviewer`: Sonnet 5.5
+- `flow-spec-reviewer`: Sonnet 5.5
+- `flow-danger-reviewer`: Sonnet 5.5
+- `flow-verifier`: Sonnet 5.5
+- `flow-explorer`: Haiku 4.5, only when exploration is needed
+- `flow-final-reviewer`: Opus 5.5
+
+If launching a named agent fails because of usage limits, re-send the SAME
+brief to the generic `claude` subagent using the intended session model and
+record the actual model used in that iteration's Flow Log line — never skip
+the step.
 
 Phases 1–2 are interactive with the user; after the user approves the spec,
 Phase 3 runs autonomously until done.
@@ -76,7 +81,7 @@ conversation is disposable.
   degraded orchestrator is not.
 - **Flow log.** Keep a `## Flow Log` section at the bottom of the spec. After
   every Phase 3 iteration append exactly ONE compact line:
-  `N. <slice> | rounds: <k> | review: clean|accepted <smell> | verifier: <real counts> | Jira: <k>/<n> impl | commit: <short sha> | next: <slice>`.
+  `N. <slice> | risk: <low|medium|high> | rounds: <k> | review: clean|accepted <smell> | verifier: <real counts> | Jira: <k>/<n> impl | commit: <short sha> | next: <slice>`.
   No prose, no pasted output — it must stay skimmable, because a fresh
   session reconstructs the whole run from it. `rounds:` is the review→fix
   round count for that slice; it is how a resumed session knows where it
@@ -139,6 +144,8 @@ to a FILE, never to the issue tracker.
      review in Phase 3), the branch name, and the Jira link if one was given.
    - `## Problem Statement` — the problem from the user's perspective.
    - `## Solution` — the solution from the user's perspective.
+   - `## Exploration` — only if exploration was performed, with Areas, Seams,
+     Patterns, and Open questions.
    - `## Jira Requirements` (only if a link was given) — the numbered `J1..Jn`
      list, each quoting the ticket's wording. Every `Jn` must be covered by
      at least one checklist item; note the mapping.
@@ -199,7 +206,7 @@ Each iteration:
    so a large slice does not just cost more, it fails to converge. A small
    slice runs a full three-axis round in minutes; a large one runs four
    rounds and still surfaces new blocking findings in the last.
-2. **Implement (Opus 5).** Launch `flow-implementer` with a SELF-CONTAINED
+2. **Implement (Sonnet).** Launch `flow-implementer` with a SELF-CONTAINED
    brief (it cannot see this conversation): the spec PATH and which sections
    to read (plus the `Jn` requirement numbers the slice covers), the agreed
    seams, the files/workspaces involved, any repo-documented hazards that
@@ -211,13 +218,25 @@ Each iteration:
    explicit LIST OF PATHS it touched, which you need to scope the re-review
    in step 4. If the slice adds untracked files, `git add -N` them so the
    reviewers' `git diff` can see them.
-3. **Review (three axes, fresh contexts, ONE message).** Launch
-   `flow-standards-reviewer`, `flow-spec-reviewer`, and
-   `flow-danger-reviewer` together in a single message so they run
-   concurrently. They start with EMPTY contexts — that is where the actual
-   reviewing happens, so review quality does not depend on how full YOURS
-   is. Each brief contains ONLY: the spec path, the fixed-point sha, and the
-   diff command. Never paste diff or spec content into a brief from your own
+3. **Classify risk, then review (fresh contexts, ONE message).** The
+   orchestrator classifies the slice as `low`, `medium`, or `high` before
+   launching reviewers.
+
+   - `low`: docs, tests-only, pure refactors/renames, formatting, isolated
+     pure functions, or local UI with no persistence/auth/external side effects.
+   - `medium`: API behavior, database reads/writes, background jobs, config,
+     file operations, auth-adjacent behavior, external integrations, or shared
+     runtime boundaries.
+   - `high`: destructive migrations/deletes, authorization or security-boundary
+     changes, secrets/credentials, payments, infrastructure, data movement,
+     shell execution, irreversible changes, or large blast radius.
+
+   Always launch `flow-standards-reviewer` and `flow-spec-reviewer`.
+   For danger: low = skip; medium = Sonnet; high = Opus 5.5.
+
+   Reviewers start with EMPTY contexts. Each brief contains ONLY: the spec
+   path, the fixed-point sha, and the diff command. Never paste diff or spec
+   content into a brief. For low risk, record `Danger: skipped (risk: low)`. Never paste diff or spec content into a brief from your own
    context; they read everything from disk. Do not invoke the
    `code-review` skill — these three agents carry its
    Standards and Spec briefs (smell baseline included) in their own system
@@ -249,8 +268,10 @@ Each iteration:
    Aggregate the three reports under `## Standards`, `## Spec`, and
    `## Danger`, without reranking across axes.
 4. **Fix.** If the review reports findings, hand them verbatim (with
-   `file:line`) to a fresh `flow-implementer` to address, then re-run the
-   review scoped to the paths that fix pass touched (step 3). Loop review→fix
+   `file:line`) to a fresh `flow-implementer` to address. Re-run ONLY the
+   affected review axes for the fix: Standards findings → Standards; Spec →
+   Spec; Danger → Danger; cross-cutting or unclear fixes → all applicable
+   axes. Scope re-reviews to the paths the fix pass touched. Loop review→fix
    until clean, or until only judgement-call smells remain that you
    explicitly decide to accept.
 
@@ -283,7 +304,7 @@ Each iteration:
    deciding the open question, or accepting a scoped risk. Four rounds of an
    agent arguing with itself is not more rigour; it is an unbounded loop with
    a spec-shaped hole in it.
-5. **Test (Fable 5).** Only now, with the review loop converged. Launch
+5. **Test (Sonnet).** Only now, with the review loop converged. Launch
    `flow-verifier` with the touched workspaces, the slice's intent, and the
    MODE:
 
@@ -314,10 +335,27 @@ Each iteration:
    next iteration. Each commit is a restore point: `git log <baseline>..HEAD`
    is the run's history in code form.
 
+## Final integration review
+
+When ALL checklist items are complete, the final verifier is green, and every
+Jira requirement is implemented when applicable, launch `flow-final-reviewer`
+ONCE on Opus 5.5. Give it the spec path, baseline SHA, final full diff,
+feature commit range, verifier evidence, accepted findings, and completed
+checklist.
+
+It reviews the feature as a whole for completeness, cross-slice interactions,
+regression risk, testing adequacy, dangerous behavior, and agreement between
+spec and implementation. It returns exactly `APPROVE` or `BLOCK`.
+
+If `APPROVE`, append `Final review: APPROVE` to the spec and finish. If
+`BLOCK`, do not declare the feature done: fix the blocking findings, run the
+affected review axes and final verifier, then run the final reviewer again.
+
 ## Done
 
-When the checklist is complete, the final verifier pass is green, and every
-`Jn` is Implemented, report: the spec path, the checked-off checklist, the
+When the checklist is complete, the final verifier pass is green, every
+`Jn` is Implemented when applicable, and the final integration reviewer has
+returned `APPROVE`, report: the spec path, the checked-off checklist, the
 final `J1..Jn` → status → evidence table (if a Jira link was given),
 per-workspace verifier results with real counts (not adjectives), any
 accepted judgement-call findings, the commit list (`git log <baseline>..HEAD

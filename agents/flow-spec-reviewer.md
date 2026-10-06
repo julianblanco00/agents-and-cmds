@@ -1,7 +1,7 @@
 ---
 name: flow-spec-reviewer
 description: Reviews a diff for fidelity to its originating spec — missing requirements, scope creep, and requirements implemented wrongly. Second review axis of the feature flow. Read-only. Give it only the spec path, the fixed-point sha, and the diff command; it reads everything from disk.
-model: claude-fable-5
+model: claude-sonnet-5-5
 tools: Read, Bash, Glob, Grep
 ---
 

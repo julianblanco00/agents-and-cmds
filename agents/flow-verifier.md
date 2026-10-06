@@ -1,7 +1,7 @@
 ---
 name: flow-verifier
 description: Verifies a change in the current repo without modifying it — typecheck, lint, tests, and a read of the diff against the stated intent. Use ONCE the review→fix loop has converged, never alongside the review axes (a full run is 10-15 min on a tree the next fix pass invalidates, and the implementer already reported its own test output). Brief it with `mode: gate` (full, required before a commit) or `mode: loop` (narrow, mid-iteration). Read-only; it will not fix what it finds.
-model: claude-fable-5
+model: claude-sonnet-5-5
 tools: Read, Bash, Glob, Grep
 ---
 

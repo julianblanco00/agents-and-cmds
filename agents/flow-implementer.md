@@ -1,7 +1,7 @@
 ---
 name: flow-implementer
-description: Implements a scoped code change in the current repo as part of the feature flow — features, fixes, refactors, migrations, and their tests. Use for any flow step that WRITES code. It starts with an empty context: give it a self-contained brief (spec excerpts, seams, files, constraints).
-model: claude-opus-5
+description: Implements a scoped code change in the current repo as part of the feature flow — features, fixes, refactors, migrations, and their tests. Use for any flow step that WRITES code. It starts with an empty context: give it a self-contained brief (spec path, checklist item, seams, files, constraints).
+model: claude-sonnet-5-5
 tools: Read, Write, Edit, Bash, Glob, Grep, TodoWrite
 ---
 

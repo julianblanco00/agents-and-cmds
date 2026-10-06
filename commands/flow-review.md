@@ -1,7 +1,7 @@
 ---
-description: "Review + fix pass: fresh-context three-axis code review (Standards + Spec + Danger) of a feature-flow spec's work OR of the current branch's PR; findings are handed to the implementer (Opus 5) and re-reviewed until clean, then verified. No new features — fixes only."
+description: "Review + fix pass: fresh-context three-axis code review (Standards + Spec + Danger) of a feature-flow spec's work OR of the current branch's PR; findings are handed to the implementer (Opus 5.5) and re-reviewed until clean, then verified. No new features — fixes only."
 argument-hint: [spec path | feature name | PR number/url | pr]
-model: claude-opus-5
+model: claude-opus-5-5
 ---
 
 # Flow review (review + fix stage only)
@@ -9,16 +9,14 @@ model: claude-opus-5
 Run the review→fix→re-review→verify cycle for: **$ARGUMENTS**
 
 You are a fresh orchestrator, running at whatever model this command's
-`model:` frontmatter pins — read it rather than asserting it. All four
-review/verify agents — `flow-standards-reviewer`, `flow-spec-reviewer`,
-`flow-danger-reviewer`, `flow-verifier` — are PINNED to Fable 5 in their own
-agent files; if Fable is capped by usage limits, re-send the same path-only
-brief to the generic `claude` subagent (session model) and note the
-substitution in the report — never skip the step. If Fable is so capped that
-the command cannot start, run `/flow-model opus` and re-run; `/flow-model
-fable` restores Fable-first when the cap resets. Do NOT grill, write specs, or implement NEW
+`model:` frontmatter pins — read it rather than asserting it. All five flow
+agents — `flow-implementer`, `flow-standards-reviewer`, `flow-spec-reviewer`,
+`flow-danger-reviewer`, `flow-verifier` — are PINNED to Opus 5.5 in their own
+agent files; if a launch fails because of usage limits, re-send the same brief
+to the generic `claude` subagent (session model) and note the substitution in
+the report — never skip the step. Do NOT grill, write specs, or implement NEW
 checklist items — this command exists to review work already done and get
-the findings FIXED. Only `flow-implementer` (Opus 5) touches code, and only
+the findings FIXED. Only `flow-implementer` touches code, and only
 to address review findings. Never push, never open a PR, never comment on or
 edit any PR or ticket — PR access below is strictly read-only.
 
