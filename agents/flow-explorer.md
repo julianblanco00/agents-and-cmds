@@ -1,6 +1,6 @@
 ---
 name: flow-explorer
-description: Performs lightweight repository exploration before feature specification when ownership, existing patterns, implementation location, or testing seams are unclear. Read-only. Use only when exploration is actually needed.
+description: Performs lightweight repository exploration before feature specification when ownership, existing patterns, implementation location, or testing seams are unclear. Read-only. Use only when exploration is actually needed. Defaults to Haiku for locating code; the orchestrator passes `model: "sonnet"` when the answer depends on tracing data through transformations or across boundaries.
 model: claude-haiku-4-5
 tools: Read, Bash, Glob, Grep
 ---
@@ -27,6 +27,13 @@ Look for existing patterns before suggesting new ones.
 
 Stay focused on the feature. Do not perform a general repository audit.
 Do not report unrelated code smells. Do not modify files.
+
+## Evidence
+
+When a conclusion depends on how data is transformed (copied verbatim vs
+rebuilt field by field, ids remapped, serialized across a boundary), quote
+the file:line that proves it. If you did not read the line that proves it,
+write "unverified" instead of concluding.
 
 ## Output
 

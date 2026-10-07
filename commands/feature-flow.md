@@ -20,7 +20,10 @@ code. Model allocation is intentional:
 - `flow-spec-reviewer`: Sonnet 5.5
 - `flow-danger-reviewer`: Sonnet 5.5
 - `flow-verifier`: Sonnet 5.5
-- `flow-explorer`: Haiku 4.5, only when exploration is needed
+- `flow-explorer`: Haiku 4.5 for locating (where is X, which files and
+    patterns); pass `model: "sonnet"` when the answer depends on tracing
+    behavior through transformations or across boundaries. Only when
+    exploration is needed.
 - `flow-final-reviewer`: Opus 5.5
 
 If launching a named agent fails because of usage limits, re-send the SAME
