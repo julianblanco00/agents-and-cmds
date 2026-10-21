@@ -1,5 +1,5 @@
 ---
-description: "Review + fix pass: fresh-context three-axis code review (Standards + Spec + Danger) of a feature-flow spec's work OR of the current branch's PR; findings are handed to the implementer (Opus 5.5) and re-reviewed until clean, then verified. No new features — fixes only."
+description: "Review + fix pass: fresh-context three-axis code review (Standards + Spec + Danger) of a feature-flow spec's work OR of the current branch's PR; findings are handed to the implementer (Sonnet 5.5) and re-reviewed until clean, then verified. No new features — fixes only."
 argument-hint: [spec path | feature name | PR number/url | pr]
 model: claude-opus-5-5
 ---
@@ -11,7 +11,7 @@ Run the review→fix→re-review→verify cycle for: **$ARGUMENTS**
 You are a fresh orchestrator, running at whatever model this command's
 `model:` frontmatter pins — read it rather than asserting it. All five flow
 agents — `flow-implementer`, `flow-standards-reviewer`, `flow-spec-reviewer`,
-`flow-danger-reviewer`, `flow-verifier` — are PINNED to Opus 5.5 in their own
+`flow-danger-reviewer`, `flow-verifier` — are PINNED to Sonnet 5.5 in their own
 agent files; if a launch fails because of usage limits, re-send the same brief
 to the generic `claude` subagent (session model) and note the substitution in
 the report — never skip the step. Do NOT grill, write specs, or implement NEW

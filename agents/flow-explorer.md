@@ -1,7 +1,7 @@
 ---
 name: flow-explorer
 description: Performs lightweight repository exploration before feature specification when ownership, existing patterns, implementation location, or testing seams are unclear. Read-only. Use only when exploration is actually needed. Defaults to Haiku for locating code; the orchestrator passes `model: "sonnet"` when the answer depends on tracing data through transformations or across boundaries.
-model: claude-haiku-4-5
+model: claude-haiku-5-5
 tools: Read, Bash, Glob, Grep
 ---
 

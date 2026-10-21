@@ -20,10 +20,10 @@ code. Model allocation is intentional:
 - `flow-spec-reviewer`: Sonnet 5.5
 - `flow-danger-reviewer`: Sonnet 5.5
 - `flow-verifier`: Sonnet 5.5
-- `flow-explorer`: Haiku 4.5 for locating (where is X, which files and
-    patterns); pass `model: "sonnet"` when the answer depends on tracing
-    behavior through transformations or across boundaries. Only when
-    exploration is needed.
+- `flow-explorer`: Haiku 5.5 for locating (where is X, which files and
+  patterns); pass `model: "sonnet"` when the answer depends on tracing
+  behavior through transformations or across boundaries. Only when
+  exploration is needed.
 - `flow-final-reviewer`: Opus 5.5
 
 If launching a named agent fails because of usage limits, re-send the SAME
@@ -45,9 +45,21 @@ be run, the suites that false-green, the build-order traps, the commit
 convention and hook health, and what the gates do NOT catch. Every brief you
 write quotes from it.
 
-If that section is missing, run the sweep in the global `~/.claude/CLAUDE.md`
-("In a repo with no hazard section") before launching the first implementer,
-and write what you find into the repo's `CLAUDE.md`. Until then treat every
+If that section is missing, run this sweep before launching the first
+implementer (a `flow-explorer` can do the reading), and write what you find
+into a new `## Feature flow` section of the repo's `CLAUDE.md`:
+
+- **Check commands** — typecheck, lint, unit, integration per workspace,
+  from package manifests, `Makefile`/`justfile`, and CI workflows.
+- **False-green suites** — suites that skip on a missing env var, service, or
+  flag; prove each by running it once and comparing executed vs defined
+  test counts.
+- **Never-run commands** — anything that migrates, seeds, or deletes against
+  a non-disposable database, bucket, or environment.
+- **Test conventions** — framework, file layout, fixtures/factories, how
+  external services are faked.
+- **Build-order traps, commit convention, and hook health** (do hooks run and
+  pass on a clean tree?). Until then treat every
 hazard as UNKNOWN rather than absent — an unbootstrapped repo is the case
 where a slice ships through four green gates on a suite that executed zero
 tests.
@@ -56,7 +68,9 @@ Never create, comment on, or modify tracker issues (GitHub/GitLab/Jira)
 during this flow, and never push or open a PR unless the user explicitly
 asks. Committing is allowed in exactly one place: the per-slice checkpoint
 commit in Phase 3 step 7. The spec lives as a file, not a ticket. One
-read-only exception: a Jira link the user provided (see below).
+exception: the Jira ticket the user provided, which is read freely and
+written ONLY through the assignee/status updates in "Jira status updates"
+below.
 
 ## State, resume, and long runs
 
@@ -106,8 +120,9 @@ conversation is disposable.
 ## Jira input (only when $ARGUMENTS includes a Jira link or issue key)
 
 The ticket is the source of truth for requirements — the spec derives from
-it, never the other way around. Read-only: never edit, transition, or comment
-on it.
+it, never the other way around. Never edit its fields or comment on it; the
+only writes allowed are the assignee and status updates below. Gaps and
+ambiguities stay in the spec and go to the user, never into Jira.
 
 - **Fetch it now**, before Phase 1, with the available Atlassian tools (or the
   `jira`/`acli` CLI, or the REST API — whatever this environment provides).
@@ -118,6 +133,28 @@ on it.
   grilling (gaps and ambiguities in the ticket are prime questions) and the
   spec.
 - **Re-fetch on every Phase 3 iteration** — tickets change mid-flight.
+
+### Jira status updates
+
+Workflows differ per issue type (a PCS Story has `In Progress` and
+`Product Review/QA`; an Epic has `In development` and no QA status), so never
+hardcode transition IDs: call `getTransitionsForJiraIssue` and pick by
+target status name. If no matching transition exists, do not guess — tell
+the user and continue the flow without it. Log every write as one line in
+the Flow Log (`Jira: assigned` / `Jira: <from> → <to>`).
+
+- **On start** (right after the first fetch, and again on resume): if the
+  ticket has no assignee, assign it to the current user (resolve the account
+  id with `atlassianUserInfo`). Never reassign a ticket that already has an
+  assignee. If the status is in the `To Do` category, transition it to the
+  status named `In Progress` or `In development`. If it is already in
+  progress or later, leave it alone — never move a ticket backwards.
+- **When done** (final reviewer returned `APPROVE`): transition to the QA
+  status (`Product Review/QA`, or the one status whose name contains `QA`).
+  If there is none, or more than one candidate, ask the user which to use.
+- **Never** transition to `Ready for Deployment`, `Done`, `Deployed in PROD`,
+  or any status after QA unless the user explicitly asks for it in this
+  conversation. The ticket stays in QA until they do.
 
 ## Phase 1 — Grill (interactive)
 
@@ -350,7 +387,9 @@ It reviews the feature as a whole for completeness, cross-slice interactions,
 regression risk, testing adequacy, dangerous behavior, and agreement between
 spec and implementation. It returns exactly `APPROVE` or `BLOCK`.
 
-If `APPROVE`, append `Final review: APPROVE` to the spec and finish. If
+If `APPROVE`, append `Final review: APPROVE` to the spec, move the Jira
+ticket (if one was given) to its QA status per "Jira status updates", and
+finish. If
 `BLOCK`, do not declare the feature done: fix the blocking findings, run the
 affected review axes and final verifier, then run the final reviewer again.
 
@@ -362,5 +401,6 @@ returned `APPROVE`, report: the spec path, the checked-off checklist, the
 final `J1..Jn` → status → evidence table (if a Jira link was given),
 per-workspace verifier results with real counts (not adjectives), any
 accepted judgement-call findings, the commit list (`git log <baseline>..HEAD
---oneline`), and the full list of changed files. Do not push, open a PR, or
-touch the Jira ticket unless the user asks.
+--oneline`), the full list of changed files, and the ticket's final Jira
+status. Do not push, open a PR, or move the ticket past QA unless the user
+asks.

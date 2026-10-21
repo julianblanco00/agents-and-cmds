@@ -59,6 +59,12 @@ Work in bounded reads:
 - **(d) Spec now false** — where the diff proves a spec claim untrue (a user
   story promising something the code cannot deliver). The spec is a living
   document: say which line needs correcting.
+- **(e) Untested requirement** — for every requirement or checklist item the
+  diff claims to deliver, name the test (`file:line`) that proves it through
+  the agreed seam. A requirement with no test, a test that only covers the
+  happy path when the spec defines failure behavior, or a test whose
+  assertions would still pass with the feature removed, is a finding. Give
+  the mapping `requirement → test` in the report.
 
 ## Report
 

@@ -61,6 +61,19 @@ Each reads *what it is* → *how to fix*; match it against the diff:
 - **Middle Man**: a class or function that mostly just delegates onward. → cut it, call the real target direct.
 - **Refused Bequest**: a subclass or implementer that ignores or overrides most of what it inherits. → drop the inheritance, use composition.
 
+### Test smell baseline
+
+Apply to test files in the diff, with the same two rules (repo overrides;
+always a judgement call):
+
+- **Implementation-Coupled Test**: asserts that internal functions were called, or on private state. → assert on the observable outcome instead.
+- **Mocking What You Own**: mocks a module of this repo rather than a system boundary. → use the real module or an in-memory fake.
+- **Tautological Test**: the expected value is computed by the same code under test, or the assertion cannot fail. → assert against a literal, independently derived value.
+- **Assertion-Free / Weak Assertion**: runs code but asserts nothing meaningful (`toBeDefined`, `not.toThrow` alone, huge snapshots). → assert the specific outcome.
+- **Nondeterministic Test**: depends on real time, unseeded randomness, test order, network, or sleeps. → inject clock/seed, isolate state, await the condition.
+- **Eager Test**: one test checks several unrelated behaviors. → split so each fails for one reason.
+- **Mystery Guest**: depends on fixtures or data defined far away and invisible in the test. → set up what the test needs inside it, or name the fixture by its meaning.
+
 ## Report
 
 Under 400 words. Per file/hunk where relevant, report:
